@@ -78,6 +78,13 @@ def main() :
 
     ##
 
+
+    gd_src.rmdir()
+    gd_trg.rmdir()
+
+
+    ##
+
 ##
 if __name__ == "__main__" :
     main()
