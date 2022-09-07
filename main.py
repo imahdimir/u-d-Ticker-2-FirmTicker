@@ -9,7 +9,7 @@ from mirutil.df_utils import save_df_as_a_nice_xl as sxl
 
 class GDUrl :
     cur = 'https://github.com/imahdimir/b-d-Ticker-2-FirmTicker'
-    src = 'https://github.com/imahdimir/d-TSETMC_ID-2-FirmTicker'
+    src = 'https://github.com/imahdimir/d-FirmTickers'
     trg = 'https://github.com/imahdimir/d-Ticker-2-FirmTicker'
 
 gdu = GDUrl()
@@ -27,10 +27,10 @@ ptrns = {
         3    : lambda x : x + '3' ,
         4    : lambda x : x + '4' ,
         'h'  : lambda x : x + 'ح' ,
-        'h1' : lambda x : x + 'ح'  + '1' ,
-        'h2' : lambda x : x + 'ح'  + '2' ,
-        'h3' : lambda x : x + 'ح'  + '3' ,
-        'h4' : lambda x : x + 'ح'  + '4' ,
+        'h1' : lambda x : x + 'ح' + '1' ,
+        'h2' : lambda x : x + 'ح' + '2' ,
+        'h3' : lambda x : x + 'ح' + '3' ,
+        'h4' : lambda x : x + 'ح' + '4' ,
         }
 
 def main() :
@@ -55,12 +55,12 @@ def main() :
         df = pd.concat([df , _df])
 
     ##
-    df.sort_values(by = [c.ftic , c.tic] , inplace = True)
-    ##
-    msk = df.duplicated(subset = c.tic, keep = False)
+    msk = df.duplicated(subset = c.tic , keep = False)
     df1 = df[msk]
 
     df = df[~ msk]
+    ##
+    df.sort_values(by = [c.ftic , c.tic] , inplace = True)
     ##
     df = df[[c.tic , c.ftic]]
     ##
@@ -74,7 +74,7 @@ def main() :
     ##
     da.drop_duplicates(inplace = True)
     ##
-    msk = da.duplicated(subset = c.tic, keep = False)
+    msk = da.duplicated(subset = c.tic , keep = False)
     df1 = da[msk]
 
     da = da[~ msk]
