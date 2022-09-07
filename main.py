@@ -10,8 +10,10 @@ from persiantools.characters import ar_to_fa
 
 class GDUrl :
     cur = 'https://github.com/imahdimir/b-d-Ticker-2-FirmTicker'
-    src = 'https://github.com/imahdimir/d-FirmTickers'
-    trg = 'https://github.com/imahdimir/d-Ticker-2-FirmTicker'
+    src0 = 'https://github.com/imahdimir/d-FirmTickers'
+    src1 = 'https://github.com/imahdimir/md-Ticker-2-FirmTicker'
+    trg0 = 'https://github.com/imahdimir/d-0-Ticker-2-FirmTicker'
+    trgf = 'https://github.com/imahdimir/d-Ticker-2-FirmTicker'
 
 gdu = GDUrl()
 
@@ -19,8 +21,15 @@ class ColName :
     ftic = 'FirmTicker'
     tic = 'Ticker'
     faftic = 'faFirmTicker'
+    src = 'Source'
 
 c = ColName()
+
+class Source :
+    ptr = 'ptr'  # builded by pattern
+    man = 'man'  # manually added
+
+src = Source()
 
 ptrns = {
         0     : lambda x : x ,
@@ -50,18 +59,18 @@ def main() :
 
     ##
 
-    gd_src = GithubData(gdu.src)
-    gd_src.overwriting_clone()
+    gd_src0 = GithubData(gdu.src0)
+    gd_src0.overwriting_clone()
     ##
-    ds = gd_src.read_data()
+    ds0 = gd_src0.read_data()
     ##
-    ds = ds[[c.ftic]]
-    ds.drop_duplicates(inplace = True)
+    ds0 = ds0[[c.ftic]]
+    ds0.drop_duplicates(inplace = True)
     ##
     df = pd.DataFrame()
 
     for _ , vl in ptrns.items() :
-        _df = ds.copy()
+        _df = ds0.copy()
         _df[c.tic] = _df[c.ftic].apply(vl)
 
         df = pd.concat([df , _df])
@@ -69,6 +78,19 @@ def main() :
     ##
     df.drop_duplicates(inplace = True)
     ##
+    df[c.src] = src.ptr
+    ##
+
+    gd_src1 = GithubData(gdu.src1)
+    gd_src1.overwriting_clone()
+    ##
+    ds1 = gd_src1.read_data()
+    ##
+    ds1[c.src] = src.man
+    ##
+    df = pd.concat([ds1 , df])
+    ##
+
     msk = df.duplicated(subset = c.tic , keep = False)
     df1 = df[msk]
     ##
@@ -76,25 +98,32 @@ def main() :
     ##
     df.sort_values(by = [c.ftic , c.tic] , inplace = True)
     ##
-    df = df[[c.tic , c.ftic]]
+    df = df[[c.tic , c.ftic , c.src]]
+
     ##
 
-    gd_trg = GithubData(gdu.trg)
+    gd_trg0 = GithubData(gdu.trg0)
+    gd_trg0.overwriting_clone()
+    ##
+    dt0p = gd_trg0.data_fp
+    ##
+    sxl(df , dt0p)
+    ##
+    msg = 'builded by: '
+    msg += gdu.cur
+    ##
+    gd_trg0.commit_and_push(msg)
+
+    ##
+    df.drop(columns = c.src , inplace = True)
+
+    ##
+
+    gd_trg = GithubData(gdu.trgf)
     gd_trg.overwriting_clone()
     ##
-    da = gd_trg.read_data()
-    ##
-    da = pd.concat([da , df])
-    ##
-    da.drop_duplicates(inplace = True)
-    ##
-    msk = da.duplicated(subset = c.tic , keep = False)
-    df1 = da[msk]
-
-    da = da[~ msk]
-    ##
-    dap = gd_trg.data_fp
-    sxl(da , dap)
+    dfp = gd_trg.data_fp
+    sxl(df , dfp)
 
     ##
     msg = 'builded by: '
@@ -105,7 +134,9 @@ def main() :
     ##
 
 
-    gd_src.rmdir()
+    gd_src0.rmdir()
+    gd_src1.rmdir()
+    gd_trg0.rmdir()
     gd_trg.rmdir()
 
 
