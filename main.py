@@ -22,13 +22,15 @@ c = ColName()
 
 ptrns = {
         0    : lambda x : x ,
-        2    : lambda x : f'{x}2' ,
-        3    : lambda x : f'{x}3' ,
-        4    : lambda x : f'{x}4' ,
-        'h'  : lambda x : f'{x}ح' ,
-        'h2' : lambda x : f'{x}ح' + '2' ,
-        'h3' : lambda x : f'{x}ح' + '3' ,
-        'h4' : lambda x : f'{x}ح' + '4' ,
+        1    : lambda x : x + '1' ,
+        2    : lambda x : x + '2' ,
+        3    : lambda x : x + '3' ,
+        4    : lambda x : x + '4' ,
+        'h'  : lambda x : x + 'ح' ,
+        'h1' : lambda x : x + 'ح'  + '1' ,
+        'h2' : lambda x : x + 'ح'  + '2' ,
+        'h3' : lambda x : x + 'ح'  + '3' ,
+        'h4' : lambda x : x + 'ح'  + '4' ,
         }
 
 def main() :
@@ -55,6 +57,11 @@ def main() :
     ##
     df.sort_values(by = [c.ftic , c.tic] , inplace = True)
     ##
+    msk = df.duplicated(subset = c.tic, keep = False)
+    df1 = df[msk]
+
+    df = df[~ msk]
+    ##
     df = df[[c.tic , c.ftic]]
     ##
 
@@ -66,6 +73,11 @@ def main() :
     da = pd.concat([da , df])
     ##
     da.drop_duplicates(inplace = True)
+    ##
+    msk = da.duplicated(subset = c.tic, keep = False)
+    df1 = da[msk]
+
+    da = da[~ msk]
     ##
     dap = gd_trg.data_fp
     sxl(da , dap)
@@ -92,7 +104,6 @@ if __name__ == "__main__" :
 ##
 # noinspection PyUnreachableCode
 if False :
-
     pass
 
     ##
