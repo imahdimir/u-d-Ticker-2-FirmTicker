@@ -1,2 +1,4 @@
-pandas~=1.4.4
-githubdata~=8.0
+pandas~=1.5.1
+githubdata~=12.1.1
+persiantools~=3.0.1
+mirutil~=21.2.0

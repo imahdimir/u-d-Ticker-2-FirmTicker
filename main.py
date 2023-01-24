@@ -2,34 +2,19 @@
 
     """
 
+from pathlib import Path
+
 import pandas as pd
-from githubdata import GithubData
-from mirutil.df_utils import save_df_as_a_nice_xl as sxl
+from githubdata import GitHubDataRepo
 from persiantools.characters import ar_to_fa
 
+from mirutil.ns import update_ns_module , rm_ns_module
 
-class GDUrl :
-    cur = 'https://github.com/imahdimir/b-d-Ticker-2-FirmTicker'
-    src0 = 'https://github.com/imahdimir/d-FirmTickers'
-    src1 = 'https://github.com/imahdimir/md-Ticker-2-FirmTicker'
-    trg0 = 'https://github.com/imahdimir/d-0-Ticker-2-FirmTicker'
-    trgf = 'https://github.com/imahdimir/d-Ticker-2-FirmTicker'
+update_ns_module()
+import ns
 
-gdu = GDUrl()
-
-class ColName :
-    ftic = 'FirmTicker'
-    tic = 'Ticker'
-    faftic = 'faFirmTicker'
-    src = 'Source'
-
-c = ColName()
-
-class Source :
-    ptr = 'ptr'  # builded by pattern
-    man = 'man'  # manually added
-
-src = Source()
+gdu = ns.GDU()
+c = ns.Col()
 
 ptrns = {
         0     : lambda x : x ,
@@ -59,104 +44,95 @@ def main() :
 
     ##
 
-    gd_src0 = GithubData(gdu.src0)
-    gd_src0.overwriting_clone()
+    gdsa = GitHubDataRepo(gdu.srca)
+    gdsa.clone_overwrite()
+
     ##
-    ds0 = gd_src0.read_data()
-    ##
-    ds0 = ds0[[c.ftic]]
-    ds0.drop_duplicates(inplace = True)
+    dfa = gdsa.read_data()
+
     ##
     df = pd.DataFrame()
 
     for _ , vl in ptrns.items() :
-        _df = ds0.copy()
+        _df = dfa.copy()
         _df[c.tic] = _df[c.ftic].apply(vl)
 
         df = pd.concat([df , _df])
 
     ##
-    df.drop_duplicates(inplace = True)
-    ##
-    df[c.src] = src.ptr
-    ##
+    df = df.drop_duplicates()
 
-    gd_src1 = GithubData(gdu.src1)
-    gd_src1.overwriting_clone()
     ##
-    ds1 = gd_src1.read_data()
-    ##
-    ds1[c.src] = src.man
-    ##
-    df = pd.concat([ds1 , df])
-    ##
+    gdsb = GitHubDataRepo(gdu.srcb)
+    gdsb.clone_overwrite()
 
+    ##
+    dfb = gdsb.read_data()
+
+    ##
+    dfb = dfb[[c.btic , c.ftic]]
+
+    ##
+    dfc = pd.DataFrame()
+
+    for _ , vl in ptrns.items() :
+        _df = dfb.copy()
+        _df[c.tic] = _df[c.btic].apply(vl)
+
+        dfc = pd.concat([dfc , _df])
+
+    ##
+    dfc = dfc.drop_duplicates()
+
+    ##
+    df = pd.concat([df , dfc])
+
+    ##
+    df = df.drop_duplicates()
+
+    ##
+    df = df[[c.tic , c.ftic]]
+
+    ##
     msk = df.duplicated(subset = c.tic , keep = False)
     df1 = df[msk]
+
     ##
     df = df[~ msk]
-    ##
-    df.sort_values(by = [c.ftic , c.tic] , inplace = True)
-    ##
-    df = df[[c.tic , c.ftic , c.src]]
 
     ##
-
-    gd_trg0 = GithubData(gdu.trg0)
-    gd_trg0.overwriting_clone()
-    ##
-    dt0p = gd_trg0.data_fp
-    ##
-    sxl(df , dt0p)
-    ##
-    msg = 'builded by: '
-    msg += gdu.cur
-    ##
-    gd_trg0.commit_and_push(msg)
+    df = df.sort_values(by = [c.ftic , c.tic])
 
     ##
-    df.drop(columns = c.src , inplace = True)
+    df = df.set_index(c.tic)
 
     ##
-
-    gd_trg = GithubData(gdu.trgf)
-    gd_trg.overwriting_clone()
-    ##
-    dfp = gd_trg.data_fp
-    sxl(df , dfp)
+    gdt = GitHubDataRepo(gdu.trg)
+    gdt.clone_overwrite()
 
     ##
-    msg = 'builded by: '
-    msg += gdu.cur
-    ##
-    gd_trg.commit_and_push(msg)
+    dffp = gdt.local_path / 'data.prq'
 
     ##
-
-
-    gd_src0.rmdir()
-    gd_src1.rmdir()
-    gd_trg0.rmdir()
-    gd_trg.rmdir()
-
+    df.to_parquet(dffp)
 
     ##
+    msg = 'Updated by: '
+    msg += gdu.slf
+
+    ##
+    gdt.commit_and_push(msg)
+
+    ##
+    gdsa.rmdir()
+    gdsb.rmdir()
+    gdt.rmdir()
+
+    rm_ns_module()
 
 ##
+
+
 if __name__ == "__main__" :
     main()
-
-##
-# noinspection PyUnreachableCode
-if False :
-    pass
-
-    ##
-
-
-    ##
-
-
-    ##
-
-##
+    print(f'{Path(__file__).name} Done!')
