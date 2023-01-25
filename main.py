@@ -9,6 +9,7 @@ from githubdata import GitHubDataRepo
 from persiantools.characters import ar_to_fa
 
 from mirutil.ns import update_ns_module , rm_ns_module
+from mirutil.df import save_as_prq_wo_index as save_as_prq
 
 update_ns_module()
 import ns
@@ -104,9 +105,6 @@ def main() :
     df = df.sort_values(by = [c.ftic , c.tic])
 
     ##
-    df = df.set_index(c.tic)
-
-    ##
     gdt = GitHubDataRepo(gdu.trg)
     gdt.clone_overwrite()
 
@@ -114,7 +112,7 @@ def main() :
     dffp = gdt.local_path / 'data.prq'
 
     ##
-    df.to_parquet(dffp)
+    save_as_prq(df , dffp)
 
     ##
     msg = 'Updated by: '
